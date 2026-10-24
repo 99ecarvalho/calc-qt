@@ -95,8 +95,9 @@ For a new local build, add an entry to `debian/changelog` with `dch -l +local`, 
 
 ## Keeping up with upstream
 
-The port only adds files: `src/linux/`, `debian/` and two lines in `.gitignore`.
-No upstream file is changed, so rebasing onto a new upstream is usually conflict free.
+The port adds `src/linux/` and `debian/`, two lines in `.gitignore`, and its own `README.md`.
+The upstream README is kept as `README.upstream.md`. No other upstream file is changed, so rebasing onto a new upstream is usually conflict free.
+If upstream edits its README, the rebase stops on `README.md`: keep the calc-qt version, and copy the upstream text into `README.upstream.md`.
 
 ```bash
 git remote add upstream https://github.com/microsoft/calculator.git
