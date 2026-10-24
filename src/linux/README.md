@@ -1,6 +1,6 @@
-# Calculator for Linux
+# calc-qt
 
-This folder ports Windows Calculator to Linux.
+This folder ports Windows Calculator to Linux, as `calc-qt`.
 
 The math comes from the upstream engine, `src/CalcManager`. It is built as is. No upstream file is changed.
 The Windows interface (UWP, XAML and C#) does not run on Linux. It is replaced by a Qt 6 Widgets interface in `app/`.
@@ -52,7 +52,7 @@ cmake --build build-linux
 Run it:
 
 ```bash
-./build-linux/ms-calculator
+./build-linux/calc-qt
 ```
 
 Run the engine tests:
@@ -88,7 +88,7 @@ src/linux/packaging/build-deb.sh
 Install it:
 
 ```bash
-sudo apt install ./dist/ms-calculator_*_amd64.deb
+sudo apt install ./dist/calc-qt_*_amd64.deb
 ```
 
 For a new local build, add an entry to `debian/changelog` with `dch -l +local`, or edit the version by hand.
@@ -147,5 +147,7 @@ The app also takes `--type <keys>` and `--screenshot <file>`. They help with tes
 ## License
 
 MIT, like the upstream project. See `LICENSE` at the repository root.
+
+The app icon uses the "calculator" glyph from [Tabler Icons](https://tabler.io/icons), MIT License, Copyright (c) 2020-2024 Paweł Kuna. See `packaging/icons/LICENSE.tabler-icons`.
 
 This is an unofficial port. It is not made or endorsed by Microsoft. "Microsoft" and "Windows" are trademarks of Microsoft Corporation.

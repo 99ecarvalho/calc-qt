@@ -10,16 +10,16 @@
 int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
-    QApplication::setOrganizationName(QStringLiteral("ms-calc"));
-    QApplication::setApplicationName(QStringLiteral("Calculator"));
+    QApplication::setOrganizationName(QStringLiteral("calc-qt"));
+    QApplication::setApplicationName(QStringLiteral("calc-qt"));
     QApplication::setApplicationVersion(QStringLiteral(PROJECT_VERSION));
-    QApplication::setDesktopFileName(QStringLiteral("ms-calculator"));
+    QApplication::setDesktopFileName(QStringLiteral("calc-qt"));
     QApplication::setStyle(QStyleFactory::create(QStringLiteral("Fusion")));
 
     QFontDatabase::addApplicationFont(QStringLiteral(":/icons/CalculatorIcons.ttf"));
 
     QCommandLineParser parser;
-    parser.setApplicationDescription(QStringLiteral("Windows Calculator for Linux"));
+    parser.setApplicationDescription(QStringLiteral("Calculator with the Windows Calculator engine"));
     parser.addHelpOption();
     parser.addVersionOption();
     QCommandLineOption typeOpt(QStringLiteral("type"), QStringLiteral("Type <keys> once the window is up."), QStringLiteral("keys"));

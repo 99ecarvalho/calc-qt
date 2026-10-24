@@ -71,7 +71,7 @@ MainWindow::MainWindow(QWidget* parent)
     , m_calc(new CalcBridge(this))
 {
     setWindowTitle(tr("Calculator"));
-    setWindowIcon(QIcon(QStringLiteral(":/icons/CalculatorAppList.targetsize-256_altform-unplated.png")));
+    setWindowIcon(QIcon(QStringLiteral(":/icons/calc-qt.png")));
     setMinimumSize(320, 500);
 
     connect(m_calc, &CalcBridge::primaryChanged, this, &MainWindow::onPrimaryChanged);
@@ -222,13 +222,15 @@ QWidget* MainWindow::buildHeader()
             a->setChecked(a->data().toString() == m_theme);
     });
     menu->addAction(tr("About"), this, [this] {
-        QMessageBox::about(this, tr("About Calculator"),
-                           tr("<h3>Calculator</h3>"
+        QMessageBox::about(this, tr("About calc-qt"),
+                           tr("<h3>calc-qt %2</h3>"
                               "<p>A Linux port of the open source Windows Calculator.</p>"
                               "<p>The calculation engine (CalcManager) is the upstream Microsoft "
                               "code, unchanged. The interface is rebuilt with Qt %1.</p>"
-                              "<p>Microsoft Calculator is licensed under the MIT License.</p>")
-                               .arg(QString::fromLatin1(qVersion())));
+                              "<p><a href='https://github.com/99ecarvalho/calc-qt'>github.com/99ecarvalho/calc-qt</a></p>"
+                              "<p>MIT License. Unofficial; not made or endorsed by Microsoft. "
+                              "Icon glyph from Tabler Icons (MIT).</p>")
+                               .arg(QString::fromLatin1(qVersion()), QApplication::applicationVersion()));
     });
     connect(menu, &QMenu::aboutToShow, menu, [this, group] {
         for (QAction* a : group->actions())

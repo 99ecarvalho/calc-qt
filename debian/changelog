@@ -1,7 +1,8 @@
-ms-calculator (1.1.0+git20261020.79e1ac5+local1) unstable; urgency=medium
+calc-qt (1.1.0+git20261020.79e1ac5+local1) unstable; urgency=medium
 
   * Local build of the Linux port.
   * Based on upstream microsoft/calculator commit 79e1ac5 (2026-10-20).
   * Standard, Scientific, Programmer and Date calculation modes.
+  * Named calc-qt; app icon built on the Tabler Icons calculator glyph (MIT).
 
  -- Eduardo Correia <ecorreia@apliant.com.br>  Sat, 24 Oct 2026 12:30:00 -0300

@@ -3,7 +3,7 @@
 # The UWP/WinUI front end is replaced by a Qt 6 Widgets front end in app/.
 
 cmake_minimum_required(VERSION 3.21)
-project(ms-calculator-linux VERSION 1.1.0 LANGUAGES CXX)
+project(calc-qt VERSION 1.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -46,7 +46,7 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS Widgets)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 qt_standard_project_setup()
 
-qt_add_executable(ms-calculator
+qt_add_executable(calc-qt
     app/main.cpp
     app/AppStrings.cpp
     app/AppStrings.h
@@ -62,14 +62,14 @@ qt_add_executable(ms-calculator
     app/FitLabel.h
     app/MainWindow.cpp
     app/MainWindow.h)
-target_link_libraries(ms-calculator PRIVATE CalcManager Qt6::Widgets)
-target_compile_options(ms-calculator PRIVATE -Wall -Wextra -Wno-unknown-pragmas)
-target_compile_definitions(ms-calculator PRIVATE PROJECT_VERSION="${PROJECT_VERSION}")
+target_link_libraries(calc-qt PRIVATE CalcManager Qt6::Widgets)
+target_compile_options(calc-qt PRIVATE -Wall -Wextra -Wno-unknown-pragmas)
+target_compile_definitions(calc-qt PRIVATE PROJECT_VERSION="${PROJECT_VERSION}")
 
 # Engine strings come straight from the upstream .resw files, every locale.
 # BASE strips the directory, so they are served as :/engine/<locale>/CEngineStrings.resw.
 file(GLOB ENGINE_STRING_FILES CONFIGURE_DEPENDS ${RESOURCES_DIR}/*/CEngineStrings.resw)
-qt_add_resources(ms-calculator engine_strings
+qt_add_resources(calc-qt engine_strings
     PREFIX /engine
     BASE ${RESOURCES_DIR}
     FILES ${ENGINE_STRING_FILES})
@@ -84,21 +84,24 @@ add_custom_command(
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tools/extract-strings.py ${UI_RESW_FILES}
     COMMENT "Extracting UI strings from upstream Resources.resw"
     VERBATIM)
-qt_add_resources(ms-calculator ui_strings
+qt_add_resources(calc-qt ui_strings
     PREFIX /strings
     BASE ${CMAKE_CURRENT_BINARY_DIR}/strings
     FILES ${UI_STRINGS_JSON})
 
-qt_add_resources(ms-calculator ui_images
+qt_add_resources(calc-qt ui_images
     PREFIX /icons
     BASE app/icons
     FILES app/icons/chevron-down.png app/icons/chevron-up.png)
 
-qt_add_resources(ms-calculator app_icon
+qt_add_resources(calc-qt app_icon
+    PREFIX /icons
+    BASE packaging/icons
+    FILES packaging/icons/calc-qt.png)
+qt_add_resources(calc-qt icon_font
     PREFIX /icons
     BASE ${UPSTREAM_SRC}/Calculator/Assets
-    FILES ${UPSTREAM_SRC}/Calculator/Assets/CalculatorAppList.targetsize-256_altform-unplated.png
-          ${UPSTREAM_SRC}/Calculator/Assets/CalculatorIcons.ttf)
+    FILES ${UPSTREAM_SRC}/Calculator/Assets/CalculatorIcons.ttf)
 
 # ---------------------------------------------------------------------------
 # Tests: drive the engine headless and check results.
@@ -119,11 +122,12 @@ endif()
 # Install
 # ---------------------------------------------------------------------------
 include(GNUInstallDirs)
-install(TARGETS ms-calculator RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(FILES packaging/ms-calculator.1
+install(TARGETS calc-qt RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES packaging/calc-qt.1
     DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
-install(FILES packaging/ms-calculator.desktop
+install(FILES packaging/calc-qt.desktop
     DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
-install(FILES ${UPSTREAM_SRC}/Calculator/Assets/CalculatorAppList.targetsize-256_altform-unplated.png
-    DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/256x256/apps
-    RENAME ms-calculator.png)
+install(FILES packaging/icons/calc-qt.png
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/256x256/apps)
+install(FILES packaging/icons/calc-qt.svg
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps)

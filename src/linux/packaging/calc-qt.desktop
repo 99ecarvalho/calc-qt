@@ -1,11 +1,11 @@
 [Desktop Entry]
 Type=Application
-Name=Calculator
+Name=Calc-Qt
 GenericName=Calculator
-Comment=Windows Calculator ported to Linux
-Exec=ms-calculator
-Icon=ms-calculator
+Comment=Calculator with the Windows Calculator engine and a Qt interface
+Exec=calc-qt
+Icon=calc-qt
 Terminal=false
 Categories=Utility;Calculator;Qt;
 Keywords=calculator;math;scientific;programmer;
-StartupWMClass=ms-calculator
+StartupWMClass=calc-qt

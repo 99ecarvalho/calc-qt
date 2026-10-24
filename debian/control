@@ -1,4 +1,4 @@
-Source: ms-calculator
+Source: calc-qt
 Section: math
 Priority: optional
 Maintainer: Eduardo Correia <ecorreia@apliant.com.br>
@@ -8,10 +8,10 @@ Build-Depends: debhelper-compat (= 13),
                python3:any,
                qt6-base-dev (>= 6.5)
 Standards-Version: 4.7.0
-Homepage: https://github.com/microsoft/calculator
+Homepage: https://github.com/99ecarvalho/calc-qt
 Rules-Requires-Root: no
 
-Package: ms-calculator
+Package: calc-qt
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Description: Windows Calculator engine with a native Qt interface

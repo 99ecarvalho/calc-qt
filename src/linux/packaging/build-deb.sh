@@ -19,9 +19,9 @@ dpkg-buildpackage --build=binary --no-sign
 debian/rules clean >/dev/null
 
 mkdir -p dist
-for f in ../ms-calculator*_"${version}"_"${arch}".deb \
-         ../ms-calculator_"${version}"_"${arch}".buildinfo \
-         ../ms-calculator_"${version}"_"${arch}".changes; do
+for f in ../calc-qt*_"${version}"_"${arch}".deb \
+         ../calc-qt_"${version}"_"${arch}".buildinfo \
+         ../calc-qt_"${version}"_"${arch}".changes; do
     [ -e "$f" ] && mv "$f" dist/
 done
 
@@ -29,4 +29,4 @@ echo
 echo "Packages in $root/dist:"
 ls -1 dist/*"${version}"*.deb
 echo
-echo "Install with: sudo apt install ./dist/ms-calculator_${version}_${arch}.deb"
+echo "Install with: sudo apt install ./dist/calc-qt_${version}_${arch}.deb"

@@ -11,6 +11,11 @@ Files: src/linux/* debian/*
 Copyright: 2026 Eduardo Correia
 License: Expat
 
+Files: src/linux/packaging/icons/*
+Copyright: 2020-2024 Paweł Kuna (Tabler Icons calculator glyph)
+           2026 Eduardo Correia (icon tile)
+License: Expat
+
 License: Expat
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
