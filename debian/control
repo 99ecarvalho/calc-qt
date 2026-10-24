@@ -1,0 +1,26 @@
+Source: ms-calculator
+Section: math
+Priority: optional
+Maintainer: Eduardo Correia <ecorreia@apliant.com.br>
+Build-Depends: debhelper-compat (= 13),
+               cmake (>= 3.21),
+               ninja-build,
+               python3:any,
+               qt6-base-dev (>= 6.5)
+Standards-Version: 4.7.0
+Homepage: https://github.com/microsoft/calculator
+Rules-Requires-Root: no
+
+Package: ms-calculator
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Windows Calculator engine with a native Qt interface
+ A Linux port of the open source Windows Calculator. The arbitrary precision
+ engine (CalcManager) is the upstream code, built unchanged. The interface is
+ rebuilt with Qt 6 Widgets.
+ .
+ It offers Standard, Scientific and Programmer modes, date calculation,
+ history, memory, light and dark themes, and the upstream translations of
+ engine messages and date strings.
+ .
+ This is an unofficial build. It is not made or endorsed by Microsoft.

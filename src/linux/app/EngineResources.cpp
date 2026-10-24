@@ -1,5 +1,7 @@
 #include "EngineResources.h"
 
+#include "AppStrings.h"
+
 #include <QDir>
 #include <QFile>
 #include <QXmlStreamReader>
@@ -9,26 +11,8 @@ EngineResources::EngineResources(const QLocale& locale)
     m_strings = loadResw(QStringLiteral(":/engine/en-US/CEngineStrings.resw"));
 
     // Messages follow the UI languages (LANGUAGE, then LC_MESSAGES/LANG);
-    // separators follow the numeric locale. For "pt-BR" try pt-BR, then any pt-*.
-    const QStringList available = QDir(QStringLiteral(":/engine")).entryList(QDir::Dirs);
-    QString chosen;
-    for (const QString& ui : locale.uiLanguages())
-    {
-        if (available.contains(ui, Qt::CaseInsensitive))
-        {
-            chosen = ui;
-            break;
-        }
-        const QString lang = ui.section('-', 0, 0);
-        for (const QString& dir : available)
-            if (dir.section('-', 0, 0).compare(lang, Qt::CaseInsensitive) == 0)
-            {
-                chosen = dir;
-                break;
-            }
-        if (!chosen.isEmpty())
-            break;
-    }
+    // separators follow the numeric locale.
+    const QString chosen = AppStrings::pickLocale(QDir(QStringLiteral(":/engine")).entryList(QDir::Dirs), locale);
     if (!chosen.isEmpty() && chosen.compare(QLatin1String("en-US"), Qt::CaseInsensitive) != 0)
     {
         const auto local = loadResw(QStringLiteral(":/engine/%1/CEngineStrings.resw").arg(chosen));

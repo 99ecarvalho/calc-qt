@@ -1,0 +1,30 @@
+.TH MS-CALCULATOR 1 "October 2026" "ms-calculator 1.1.0" "User Commands"
+.SH NAME
+ms-calculator \- Windows Calculator engine with a native Qt interface
+.SH SYNOPSIS
+.B ms-calculator
+[\fB\-\-type\fR \fIkeys\fR] [\fB\-\-screenshot\fR \fIfile\fR]
+.SH DESCRIPTION
+A Linux port of the open source Windows Calculator.
+It has Standard, Scientific, Programmer and Date calculation modes,
+history and memory.
+The math is done by the upstream arbitrary precision engine.
+.SH OPTIONS
+.TP
+.BR \-\-type " " \fIkeys\fR
+Type \fIkeys\fR into the calculator once the window is up.
+.TP
+.BR \-\-screenshot " " \fIfile\fR
+Save an image of the window to \fIfile\fR and quit.
+.TP
+.BR \-h ", " \-\-help
+Show help.
+.TP
+.BR \-v ", " \-\-version
+Show the version.
+.SH FILES
+.TP
+.I ~/.config/ms-calc/Calculator.conf
+Mode, window position, theme and keep on top.
+.SH NOTES
+This is an unofficial build. It is not made or endorsed by Microsoft.

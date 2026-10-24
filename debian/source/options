@@ -1,0 +1,4 @@
+# Keep local build trees and packages out of source packages.
+tar-ignore = build-linux
+tar-ignore = dist
+tar-ignore = obj-*

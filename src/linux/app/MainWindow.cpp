@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 
 #include <QActionGroup>
+#include <QAbstractSpinBox>
 #include <QApplication>
 #include <QClipboard>
 #include <QCloseEvent>
@@ -16,12 +17,15 @@
 #include <QRegularExpression>
 #include <QScreen>
 #include <QSettings>
+#include <QStackedWidget>
 #include <QStyleHints>
 #include <QTabBar>
 #include <QTabWidget>
 #include <QToolButton>
 #include <QVBoxLayout>
 
+#include "AppStrings.h"
+#include "DatePage.h"
 #include "FitLabel.h"
 
 namespace
@@ -117,6 +121,18 @@ void MainWindow::buildUi()
 
     col->addWidget(buildHeader());
 
+    m_pages = new QStackedWidget(column);
+    col->addWidget(m_pages, 1);
+    auto* calcPage = new QWidget(m_pages);
+    auto* calc = new QVBoxLayout(calcPage);
+    calc->setContentsMargins(0, 0, 0, 0);
+    calc->setSpacing(2);
+    m_pages->addWidget(calcPage);
+    m_datePage = new DatePage(m_pages);
+    m_pages->addWidget(m_datePage);
+    column = calcPage;
+    col = calc;
+
     m_expression = new QLabel(column);
     m_expression->setObjectName(QStringLiteral("expression"));
     m_expression->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -145,7 +161,7 @@ void MainWindow::buildUi()
     m_keypadLayout->setContentsMargins(0, 0, 0, 0);
     col->addWidget(m_keypadHost, 1);
 
-    body->addWidget(column, 1);
+    body->addWidget(m_pages->parentWidget(), 1);
     body->addWidget(buildSidePanel());
 
     setCentralWidget(central);
@@ -167,20 +183,21 @@ QWidget* MainWindow::buildHeader()
 
     auto* menu = new QMenu(menuButton);
     auto* group = new QActionGroup(menu);
-    const std::pair<QString, CalcMode> modes[] = {
-        {tr("Standard"), CalcMode::Standard},
-        {tr("Scientific"), CalcMode::Scientific},
-        {tr("Programmer"), CalcMode::Programmer},
-    };
-    int n = 1;
-    for (const auto& [name, mode] : modes)
+    for (int n = 0; n <= kDateMode; ++n)
     {
-        QAction* a = menu->addAction(name, this, [this, mode = mode] { setMode(mode); });
+        QAction* a = menu->addAction(modeName(n), this, [this, n] {
+            if (n == kDateMode)
+                setDateMode();
+            else
+                setMode(static_cast<CalcMode>(n));
+        });
         a->setCheckable(true);
-        a->setShortcut(QKeySequence(Qt::ALT | (Qt::Key_0 + n++)));
+        a->setShortcut(QKeySequence(Qt::ALT | (Qt::Key_1 + n)));
         a->setShortcutVisibleInContextMenu(true);
-        a->setData(static_cast<int>(mode));
+        a->setData(n);
         group->addAction(a);
+        if (n == static_cast<int>(CalcMode::Programmer))
+            menu->addSeparator();
     }
     menu->addSeparator();
     QMenu* themeMenu = menu->addMenu(tr("Theme"));
@@ -215,7 +232,7 @@ QWidget* MainWindow::buildHeader()
     });
     connect(menu, &QMenu::aboutToShow, menu, [this, group] {
         for (QAction* a : group->actions())
-            a->setChecked(a->data().toInt() == static_cast<int>(m_calc->mode()));
+            a->setChecked(a->data().toInt() == (m_dateMode ? kDateMode : static_cast<int>(m_calc->mode())));
     });
     menuButton->setMenu(menu);
     addActions(group->actions()); // keep Alt+1..3 working while the menu is closed
@@ -952,14 +969,31 @@ void MainWindow::setMode(CalcMode mode)
     if (mode == CalcMode::Programmer)
         m_wordBits = 64;
 
-    static const char* titles[] = {"Standard", "Scientific", "Programmer"};
-    m_modeTitle->setText(tr(titles[static_cast<int>(mode)]));
+    m_dateMode = false;
+    m_pages->setCurrentIndex(0);
+    m_modeTitle->setText(modeName(static_cast<int>(mode)));
     rebuildModeArea();
     rebuildKeypad();
     updateDockedPanel();
     refreshPanels();
     onPrimaryChanged(m_calc->primary(), m_calc->isInError());
     onExpressionChanged(m_calc->expression());
+}
+
+void MainWindow::setDateMode()
+{
+    if (m_panelPopup)
+        m_panelPopup->close();
+    m_dateMode = true;
+    m_pages->setCurrentIndex(1);
+    m_modeTitle->setText(modeName(kDateMode));
+    updateDockedPanel();
+}
+
+QString MainWindow::modeName(int mode)
+{
+    static const char* keys[] = {"StandardModeText", "ScientificModeText", "ProgrammerModeText", "DateCalculationModeText"};
+    return AppStrings::get(QString::fromLatin1(keys[qBound(0, mode, int(kDateMode))]));
 }
 
 void MainWindow::pressKey(const Key& key)
@@ -1206,8 +1240,8 @@ void MainWindow::refreshMemoryBar()
 void MainWindow::updateDockedPanel()
 {
     const bool docked = width() >= kDockWidth;
-    m_sidePanel->setVisible(docked);
-    m_panelButton->setVisible(!docked);
+    m_sidePanel->setVisible(docked && !m_dateMode);
+    m_panelButton->setVisible(!docked && !m_dateMode);
     if (m_memListButton)
         m_memListButton->setVisible(!docked);
     const bool programmer = m_calc->mode() == CalcMode::Programmer;
@@ -1251,7 +1285,8 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
 bool MainWindow::eventFilter(QObject* watched, QEvent* event)
 {
     // Keys reach the calculator whatever child has focus, as in the Windows app.
-    if (event->type() == QEvent::KeyPress && watched != this && watched->isWidgetType()
+    // Date mode needs ordinary typing in its fields, so it is left alone.
+    if (!m_dateMode && event->type() == QEvent::KeyPress && watched != this && watched->isWidgetType()
         && static_cast<QWidget*>(watched)->window() == this)
     {
         if (handleKey(static_cast<QKeyEvent*>(event)))
@@ -1262,6 +1297,15 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
 
 bool MainWindow::handleKey(QKeyEvent* event)
 {
+    if (m_dateMode)
+    {
+        if (event->matches(QKeySequence::Copy) && !qobject_cast<QAbstractSpinBox*>(QApplication::focusWidget()))
+        {
+            QGuiApplication::clipboard()->setText(m_datePage->resultText());
+            return true;
+        }
+        return false;
+    }
     const CalcMode mode = m_calc->mode();
     const bool sci = mode == CalcMode::Scientific;
     const bool prog = mode == CalcMode::Programmer;
@@ -1490,6 +1534,29 @@ void MainWindow::applyTheme()
         QMenu { background: @popup; color: @text; border: 1px solid @border; padding: 4px; }
         QMenu::item { padding: 6px 24px 6px 12px; border-radius: 4px; }
         QMenu::item:selected { background: @funcHover; }
+        QLabel#dateHeader { color: @subtext; font-size: 13px; }
+        QLabel#dateResult { font-size: 24px; font-weight: 600; }
+        QLabel#dateSubResult { color: @subtext; font-size: 15px; }
+        QComboBox, QDateEdit, QSpinBox { background: @digit; color: @text; border: 1px solid @border; border-radius: 5px;
+                      padding: 5px 8px; min-height: 22px; font-size: 14px; }
+        QComboBox:hover, QDateEdit:hover, QSpinBox:hover { background: @digitHover; }
+        QComboBox::drop-down, QDateEdit::drop-down { subcontrol-origin: padding; subcontrol-position: center right;
+                      border: none; width: 24px; }
+        QComboBox::down-arrow, QDateEdit::down-arrow, QSpinBox::down-arrow { image: url(:/icons/chevron-down.png);
+                      width: 12px; height: 12px; }
+        QSpinBox::up-arrow { image: url(:/icons/chevron-up.png); width: 12px; height: 12px; }
+        QSpinBox { padding-right: 24px; }
+        QSpinBox::up-button, QSpinBox::down-button { subcontrol-origin: border; width: 22px; border: none;
+                      background: transparent; }
+        QSpinBox::up-button { subcontrol-position: top right; }
+        QSpinBox::down-button { subcontrol-position: bottom right; }
+        QSpinBox::up-button:hover, QSpinBox::down-button:hover { background: @funcHover; }
+        QComboBox QAbstractItemView { background: @popup; color: @text; selection-background-color: @funcHover;
+                      selection-color: @text; border: 1px solid @border; }
+        QRadioButton { color: @text; font-size: 14px; spacing: 6px; }
+        QCalendarWidget QWidget { background: @popup; color: @text; alternate-background-color: @func; }
+        QCalendarWidget QToolButton { color: @text; font-size: 14px; }
+        QCalendarWidget QAbstractItemView:enabled { selection-background-color: @accent; selection-color: @accentText; }
         QToolTip { background: @popup; color: @text; border: 1px solid @border; }
         QScrollBar:vertical { background: transparent; width: 6px; }
         QScrollBar::handle:vertical { background: @disabled; border-radius: 3px; min-height: 24px; }
@@ -1519,12 +1586,14 @@ void MainWindow::loadSettings()
     m_theme = s.value(QStringLiteral("theme"), QStringLiteral("system")).toString();
     applyTheme();
     setMode(static_cast<CalcMode>(qBound(0, mode, 2)));
+    if (mode == kDateMode)
+        setDateMode();
 }
 
 void MainWindow::saveSettings()
 {
     QSettings s;
-    s.setValue(QStringLiteral("mode"), static_cast<int>(m_calc->mode()));
+    s.setValue(QStringLiteral("mode"), m_dateMode ? int(kDateMode) : static_cast<int>(m_calc->mode()));
     s.setValue(QStringLiteral("geometry"), saveGeometry());
     s.setValue(QStringLiteral("keepOnTop"), m_topButton->isChecked());
     s.setValue(QStringLiteral("theme"), m_theme);

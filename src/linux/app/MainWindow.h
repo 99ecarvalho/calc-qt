@@ -9,12 +9,14 @@
 
 #include "CalcBridge.h"
 
+class DatePage;
 class FitLabel;
 class QFrame;
 class QGridLayout;
 class QLabel;
 class QListWidget;
 class QPushButton;
+class QStackedWidget;
 class QTabWidget;
 class QToolButton;
 class QVBoxLayout;
@@ -70,7 +72,12 @@ private:
     QPushButton* makeBarButton(const QString& text, const QString& tip);
     void addKeyRows(QGridLayout* grid, const std::vector<std::vector<Key>>& rows);
 
+    // Menu index of the date view, after the three calculator modes.
+    static constexpr int kDateMode = 3;
+    static QString modeName(int mode);
+
     void setMode(CalcMode mode);
+    void setDateMode();
     void pressKey(const Key& key);
     void sendCommand(int command);
 
@@ -109,6 +116,11 @@ private:
 
     CalcBridge* m_calc = nullptr;
     QString m_theme = QStringLiteral("system"); // "system", "light" or "dark"
+
+    // Calculator and date views
+    QStackedWidget* m_pages = nullptr;
+    DatePage* m_datePage = nullptr;
+    bool m_dateMode = false;
 
     // Header and display
     QLabel* m_modeTitle = nullptr;
